@@ -1,0 +1,1 @@
+This code applies task allocation to robots serially based on minimum distace and then finds path using Djikstras algorithm.
