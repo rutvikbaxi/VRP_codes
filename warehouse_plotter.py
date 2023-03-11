@@ -28,5 +28,5 @@ def plot_warehouse(ox,oy,parcel_list, robot_paths, depot_list):
     #robot_paths
     for i in range(len(robot_paths)):
         x, y = zip(*robot_paths[i])
-        ax.plot(x,y,colours[i])
+        ax.plot(x,y,colours[i%7])
     plt.show()

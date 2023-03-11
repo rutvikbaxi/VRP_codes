@@ -26,6 +26,7 @@ class Warehourse_Router:
         self.obstacles=[ox,oy]
         self.total_distance=0
         self.execute()
+        
     def find_nearest_parcel(self,robot_number):
         #for a specific robot find the nearest available parcel
         nearest_parcel=0

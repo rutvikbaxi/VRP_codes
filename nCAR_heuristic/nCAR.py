@@ -1,4 +1,5 @@
 import numpy as np
+from TSP import TSP_Solver
 class nCAR:
 
     def __init__(self, parcel_list, depot_list, C=3):
@@ -14,14 +15,16 @@ class nCAR:
         self.paths=[]
         self.total_dist=0
         self.vehicles_count=0
-        self.generate_distance_matrix()
+        self.distance_matrix=self.generate_distance_matrix()
 
-    def generate_distance_matrix(self):
-        self.distance_matrix=[[] for _ in self.nodes]
-        for i in self.nodes:
-            for j in self.nodes:
-                dij=self.calc_manh_dist(self.all_node_coordinates[i], self.all_node_coordinates[j])
-                self.distance_matrix[i].append(dij)
+    def generate_distance_matrix(self, nodes=None):
+        if nodes is None: nodes=self.nodes
+        distance_matrix=[[] for _ in nodes]
+        for i in range(len(nodes)):
+            for j in range(len(nodes)):
+                dij=self.calc_manh_dist(self.all_node_coordinates[nodes[i]], self.all_node_coordinates[nodes[j]])
+                distance_matrix[i].append(dij)
+        return distance_matrix
 
     def calc_manh_dist(self, a, b):
         return abs(a[0]-b[0]) + abs(a[1]-b[1])
@@ -36,11 +39,11 @@ class nCAR:
         return path_length
 
     def nearest_node(self, node, available_nodes):
-        nearest_node=0
+        nearest_node=node
         nearest_distance=float("inf")
         for i in available_nodes:
             curr_dist=self.calc_manh_dist(self.all_node_coordinates[node], self.all_node_coordinates[i])
-            if curr_dist < nearest_distance:
+            if curr_dist <= nearest_distance:
                 nearest_distance= curr_dist
                 nearest_node = i
 
@@ -52,10 +55,15 @@ class nCAR:
         best_node=self.remaining_nodes[0]
         for node in self.remaining_nodes:
             if node==0: continue
-            clusters[node]=[0, node]
+            clusters[node]=[0]
             rem_nodes_temp=self.remaining_nodes.copy()
             for _ in range(self.capacity-1):
-                if len(self.remaining_nodes)<=1: break #because that one node is already added to cluster
+
+                if len(self.remaining_nodes)<=1: 
+                    clusters[node].append(node)
+                    rem_nodes_temp.remove(node)
+                    break #because 
+
                 nearest_node=self.nearest_node(node, rem_nodes_temp)
                 clusters[node].append(nearest_node)
                 rem_nodes_temp.remove(nearest_node)
@@ -72,9 +80,9 @@ class nCAR:
         return clusters[best_node]
 
     def TSP(self, route):
-        best_route=route.copy()
-        best_route.append(route[0])
-        
+        distance_matrix=self.generate_distance_matrix(route)
+        best_route=TSP_Solver(route, distance_matrix)
+        # best_route=route.copy()        
         return best_route, self.euler_cycle(best_route)
 
     def execute(self):

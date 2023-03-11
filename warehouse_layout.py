@@ -41,8 +41,8 @@ def warehouse_sample_generator():
             y=random.randint(50,70)
             if ((x,y) not in parcel_list): parcel_list.append((x,y))
 
-    parcel_list=parcel_list[:len(parcel_list)//5]
-    depot_list=[[35,43]]
+    parcel_list=parcel_list[:2*len(parcel_list)//5]
+    depot_list=[(35,43)]
 
     return obstacles, parcel_list, depot_list 
 
