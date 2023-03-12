@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 def plot_warehouse(ox,oy,parcel_list, robot_paths, depot_list):
     colours=['r','g','b','k', 'c', 'm', 'y']
-    fig = plt.figure(figsize=(10,10))
+    fig = plt.figure(figsize=(10,3.7))
     ax = fig.add_subplot(1, 1, 1)
 
     # Major ticks every 20, minor ticks every 5
@@ -20,10 +20,10 @@ def plot_warehouse(ox,oy,parcel_list, robot_paths, depot_list):
 
     #parcels
     x, y = zip(*parcel_list)
-    ax.plot(x, y, ".r", markersize=5)
+    ax.plot(x, y, ".r", markersize=7)
 
     #depots
-    ax.plot(depot_list[0][0], depot_list[0][1],".g", markersize=10)
+    ax.plot(depot_list[0][0], depot_list[0][1],"^k", markersize=13)
 
     #robot_paths
     for i in range(len(robot_paths)):

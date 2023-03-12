@@ -57,7 +57,7 @@ class nCAR:
             if node==0: continue
             clusters[node]=[0]
             rem_nodes_temp=self.remaining_nodes.copy()
-            for _ in range(self.capacity-1):
+            for _ in range(self.capacity):
 
                 if len(self.remaining_nodes)<=1: 
                     clusters[node].append(node)
@@ -94,5 +94,5 @@ class nCAR:
             self.paths.append(shortest_path)
             self.total_dist+=dist
             self.vehicles_count+=1
-        return [self.paths, self.total_dist, self.vehicles_count]
+        return [self.paths, self.total_dist, self.vehicles_count,None]
     
