@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
-def warehouse_sample_generator(city_size=2, n_customers=15, n_depots=5):
-    random.seed(a=10)
+def warehouse_sample_generator(city_size=2, n_customers=15, n_depots=5,random_seed=10):
+    random.seed(a=random_seed)
     ox,oy=[],[]
     obstacles=[ox,oy]
     #square boundary

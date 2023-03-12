@@ -34,7 +34,7 @@ def plotter(ox,oy,parcel_list, depot_list=None, warehouse=None, robot_paths=None
     #truck_route
     if truck_route:
         x, y = zip(*truck_route)
-        ax.plot(x, y, "g")
+        ax.plot(x, y, "g", lw=4)
 
     #robot_paths
     if robot_paths:
@@ -49,6 +49,7 @@ def plotter(ox,oy,parcel_list, depot_list=None, warehouse=None, robot_paths=None
     # minor_ticks = np.arange(0, 101, 5)
 
     ax.set_xticks(major_ticks)
+    ax.set_xticklabels( ax.get_xticks(),rotation=90)
     # ax.set_xticks(minor_ticks, minor=True)
     ax.set_yticks(major_ticks)
     # ax.set_yticks(minor_ticks, minor=True)

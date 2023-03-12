@@ -4,10 +4,11 @@ from layout_plotter import plotter
 from models.CVRP import CVRP
 from pulp import *
 import pandas as pd
+from icecream import ic
 
 class TWO_EVRP:
-    def __init__(self, city_size=5, n_customers=45, n_depots=7, time_limit=180, n_robots_per_depot=3) -> None:
-        self.obstacles, self.customer_list, self.depot_list = warehouse_sample_generator(city_size=city_size, n_customers=n_customers, n_depots=n_depots)
+    def __init__(self, city_size=5, n_customers=45, n_depots=7, time_limit=180, n_robots_per_depot=3, random_seed=10) -> None:
+        self.obstacles, self.customer_list, self.depot_list = warehouse_sample_generator(city_size=city_size, n_customers=n_customers, n_depots=n_depots, random_seed=random_seed)
         self.DEPOTS=range(0,len(self.depot_list))
         self.ROBOTS=range(0,n_robots_per_depot) #max robots at eah depot
         self.CUSTOMERS=range(0,n_customers)
@@ -175,42 +176,44 @@ class TWO_EVRP:
             for c in range(len(self.truck_dist_matrix[0])):
                 arr[r].append(int(self.truck_dist_matrix[r][c]))
         solution=CVRP(arr, self.all_nodes_truck)
-        self.truck_only_routes=solution[0]
+        self.truckwise_routes_conv=solution[0]
+                
+        self.truck_dist_conv=solution[1]/1000 #converting to kms
+        self.truckwise_dist_conv=[x/1000 for x in solution[2]]
         
-        plotter(self.obstacles[0], self.obstacles[1], self.customer_list, self.depot_list, robot_paths=self.truck_only_routes, warehouse=self.warehouse)
-        
-        self.truck_distance_only=solution[1]/1000
-        
-
     def calculate_cost(self):
         self.charging_cost=5*0.25*0.75 # 5Rs/kWh * 0.25kW * 0.75h
-        truck_mileage=20
-        petrol_cost=100
-        # n_times_charging_required=0
-        # for d in self.DEPOTS:
-        #     for r in self.ROBOTS:
-        #         distance_per_robot=sum(self.distance_matrix[d][c]*value(self.robot_arcs_variable[(r,c,d)]) for c in self.CUSTOMERS if (r,c,d) in self.customer_optimized_set)
-        #         n_times_charging_required+=int(distance_per_robot/self.max_distance_robot)
-        # print(n_times_charging_required)
+        truck_mileage=20 #km/l
+        petrol_cost=100 #Rs/l
+        driver_hourly_rate=100 #rs
 
         self.robot_cost_charging=(self.robot_total_dist/self.max_distance_robot) * self.charging_cost
 
         self.truck_cost=self.truck_distance/ truck_mileage *petrol_cost #km/ (km/l) * Rs/l 
-        self.truck_cost+= len(self.CUSTOMERS)//50 * 
+        self.truck_cost+= driver_hourly_rate * (int(self.truck_distance/self.truck_velocity)+1)
+
+        self.two_echelon_cost= self.robot_cost_charging + self.truck_cost
+
+        self.truck_cost_only=self.truck_dist_conv/ truck_mileage *petrol_cost #km/ (km/l) * Rs/l 
+        for d in self.truckwise_dist_conv:
+            self.truck_cost_only+= driver_hourly_rate*(d/self.truck_velocity + 50*1/15) #driver cost, 
+            #for the 50 customers, theres a service time of 4 minutes which is included in the hours
 
     def execute(self):
-        # self.optimal_depots()
-        # self.p_median()
-        # self.vrp_truck()
+        self.optimal_depots()
+        self.p_median()
+        self.vrp_truck()
         self.cvrp_truck_only()
         # plotter(self.obstacles[0], self.obstacles[1], self.customer_list, self.depot_list, robot_paths=self.robot_paths, warehouse=self.warehouse, truck_route=self.truck_route_coords)
         self.calculate_cost()
 
-customers=200
-city_size=6
-solver=TWO_EVRP(city_size, customers, n_depots=6, time_limit=300, n_robots_per_depot=5)
-solver.execute()
-df=pd.DataFrame(columns=['#customers', "#depots", "#total_robot_distance", "#computational_time", "city_size"])
-df.loc[len(df)]=[customers, solver.p, solver.robot_total_dist, solver.time, city_size]
-
-print(df)
+customers=100
+city_size=5
+df=pd.DataFrame(columns=['#customers', "#depots", '#robots_used', "#total_robot_distance", "#computational_time", "city_size", "2EVRP_cost/unit", "truck_only_cost/unit"])
+for i in range(1):
+    ic(i)
+    solver=TWO_EVRP(city_size, customers, n_depots=16, time_limit=300, n_robots_per_depot=5, random_seed=2*i)
+    solver.execute()
+    df.loc[len(df)]=[customers, solver.p, solver.n_robots_used, solver.robot_total_dist, solver.time, city_size, solver.two_echelon_cost/customers, solver.truck_cost_only/customers]
+    print('--------')
+print(df.mean(axis=0))
