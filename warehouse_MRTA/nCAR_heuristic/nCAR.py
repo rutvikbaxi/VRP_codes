@@ -53,21 +53,27 @@ class nCAR:
         clusters=dict()
         best_route_length=float('inf')
         best_node=self.remaining_nodes[0]
+
         for node in self.remaining_nodes:
             if node==0: continue
             clusters[node]=[0]
+
             rem_nodes_temp=self.remaining_nodes.copy()
+            rem_nodes_temp
             for _ in range(self.capacity):
 
-                if len(self.remaining_nodes)<=1: 
-                    clusters[node].append(node)
-                    rem_nodes_temp.remove(node)
-                    break #because 
+                if len(rem_nodes_temp)==0:
+                    break
 
-                nearest_node=self.nearest_node(node, rem_nodes_temp)
+                if len(rem_nodes_temp)>1: 
+                    nearest_node=self.nearest_node(node, rem_nodes_temp)
+                else:
+                    nearest_node=rem_nodes_temp[0]
                 clusters[node].append(nearest_node)
                 rem_nodes_temp.remove(nearest_node)
-            # rem_nodes_temp=[i for i in self.remaining_nodes if i not in clusters[node]]
+
+                # except (ValueError, RuntimeError, NameError):
+
             current_heuristic_length=self.euler_cycle(clusters[node]) + self.euler_cycle(rem_nodes_temp)
 
             if current_heuristic_length < best_route_length:

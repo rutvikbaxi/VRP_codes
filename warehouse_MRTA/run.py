@@ -7,31 +7,37 @@ from icecream import install
 install()
 import pandas as pd
 import time
+from tqdm import tqdm
 
 df=pd.DataFrame(columns=["#parcels", "#capacity_robot", "#GA_distance", "nCAR_dist", "t_GA", "t_nCAR"])
-n_parcels=[100,200]
-capacity =[ 3,  4]
+n_parcels=[200, 100, 60]
+capacity =[ 3, 4]
 
-for p in n_parcels:
-    for c in capacity:
+n_parcels=[40]
+capacity=[5]
+
+for p in tqdm(n_parcels, leave=True):
+    for c in tqdm(capacity, leave=False, desc=f"parcels {p}"):
         df_temp=pd.DataFrame(columns=["#parcels", "#capacity_robot", "#GA_distance", "nCAR_dist",  "t_GA", "t_nCAR"])
-        for _ in range(3):
-            obstacles, parcel_list, depot_list = warehouse_sample_generator(a=10, n_customers=p) 
+        for instance in tqdm(range(3), desc=f"capacity {c}", leave=False):
+            obstacles, parcel_list, depot_list = warehouse_sample_generator(a=instance, n_customers=p) 
+
             t_on=time.time()
-            parcel_mapper= nCAR(parcel_list=parcel_list, depot_list=depot_list, C=5)
+            parcel_mapper= nCAR(parcel_list=parcel_list, depot_list=depot_list, C=c)
             [paths, dist_heuristic, n_robots, progress]=parcel_mapper.execute()
             t_nCAR=time.time()-t_on
 
             t_on=time.time()
-            parcel_mapper=GA(parcel_list, depot_list, C=5, size_pop=50, max_iter=300, prob_mut=0.05)
-            [paths, dist_GA, n_robots, progress]=parcel_mapper.execute()
+            parcel_mapper=GA(parcel_list, depot_list, C=c, size_pop=50, max_iter=300, prob_mut=0.05)
+            [paths1, dist_GA, n_robots, progress]=parcel_mapper.execute()
             t_GA=time.time()-t_on
 
             df_temp.loc[len(df_temp.index)]=[p, c, dist_GA, dist_heuristic, t_GA, t_nCAR]
         df.loc[len(df.index)]=df_temp.mean()
+
 df.to_csv("results.csv", index=False)
 
-# plot_warehouse(obstacles[0], obstacles[1], parcel_list, robot_paths=paths, depot_list=depot_list)
+plot_warehouse(obstacles[0], obstacles[1], parcel_list, robot_paths=paths, depot_list=depot_list)
 
 ic(df)
 

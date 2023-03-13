@@ -45,9 +45,22 @@ def warehouse_sample_generator(a=10, n_customers=20):
             n_customers_added+=1
 
             y=random.randint(20,30)
-            while ((x,y) in parcel_list): y=random.randint(5,15)
+            while ((x,y) in parcel_list): y=random.randint(20,30)
             parcel_list.append((x,y))
             n_customers_added+=1
+
+            if n_customers>100:
+                x=x-2
+                y=random.randint(5,15)
+                while ((x,y) in parcel_list): y=random.randint(5,15)
+                parcel_list.append((x,y))
+                n_customers_added+=1
+
+                y=random.randint(20,30)
+                while ((x,y) in parcel_list): y=random.randint(20,30)
+                parcel_list.append((x,y))
+                n_customers_added+=1
+
 
     depot_list=[(55,17)]
 
